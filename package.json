@@ -28,5 +28,5 @@
     "start:dev": "parcel app/index.html --log-level 2",
     "lint:js": "prettier --write app/**/*.js && eslint --fix \"app/**/*.js\"",
     "lint:staged": "lint-staged"
-  },
+  }
 }
