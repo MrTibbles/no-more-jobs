@@ -154,3 +154,11 @@ class DatePicker extends HTMLElement {
 }
 
 customElements.define("date-picker", DatePicker);
+
+const addTodoButton = document.querySelector(".add-todo");
+
+addTodoButton.onclick = e => {
+  e.preventDefault();
+
+  console.info(e)
+};
