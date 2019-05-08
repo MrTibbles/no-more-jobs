@@ -11,6 +11,12 @@
   margin-inline-end: 0;
 }
 
+button {
+  outline: none;
+  border: none;
+  background: none;
+}
+
 body, html {
   font-size: 75%;
   font-family: sans-serif;
@@ -20,9 +26,29 @@ body, html {
 
 .container {
   min-height: 100vh;
-  padding: 0 24px;
+  padding: 1.5rem;
 }
 
 form {
   display: flex;
+  align-items: center;
+}
+
+form input {
+  padding: 0 7px;
+  height: 50px;
+  flex: 5;
+}
+
+.date-picker {
+  flex: 1;
+}
+
+.add-todo {
+  flex: 0.5;
+}
+
+.add-todo svg {
+  width: 1.875rem;
+  height: 1.40625rem;
 }
