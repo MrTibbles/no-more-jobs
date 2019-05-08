@@ -1,18 +1,18 @@
 const theme = {
   palette: {
-    primary: 'aquamarine',
-    highlight: 'deeppink',
-    magnolia: '#f7f7f7',
-    dark: '#0d0d0d'
+    primary: "aquamarine",
+    highlight: "deeppink",
+    magnolia: "#f7f7f7",
+    dark: "#0d0d0d"
   }
-}
+};
 
 /**
  * Web Component Utils
  */
 const getRootInstance = (nodePath, componentName) => {
-  return nodePath.find(({ nodeName }) => nodeName === componentName)
-}
+  return nodePath.find(({ nodeName }) => nodeName === componentName);
+};
 
 class DatePicker extends HTMLElement {
   constructor() {
@@ -23,25 +23,25 @@ class DatePicker extends HTMLElement {
     const wrapper = document.createElement("div");
     wrapper.setAttribute("class", "wrapper");
 
-    const dateDisplay = document.createElement('div')
-    dateDisplay.onclick = this.updateOpenState
-    dateDisplay.setAttribute('class', 'select-date')
+    const dateDisplay = document.createElement("div");
+    dateDisplay.onclick = this.updateOpenState;
+    dateDisplay.setAttribute("class", "select-date");
     dateDisplay.innerHTML = `
       <p>Select due date</p>
-    `
+    `;
 
-    const dateOptions = document.createElement('div')
-    dateOptions.setAttribute('class', 'days')
-    dateOptions.onclick = this.selectDate
+    const dateOptions = document.createElement("div");
+    dateOptions.setAttribute("class", "days");
+    dateOptions.onclick = this.updateSelectedDate;
     dateOptions.innerHTML = `
-      <span id="1">1</span>
-      <span id="2">2</span>
-      <span id="3">3</span>
-      <span id="4">4</span>
-      <span id="5">5</span>
-      <span id="6">6</span>
-      <span id="7">7</span>
-    `
+      <span data-value="1">1</span>
+      <span data-value="2">2</span>
+      <span data-value="3">3</span>
+      <span data-value="4">4</span>
+      <span data-value="5">5</span>
+      <span data-value="6">6</span>
+      <span data-value="7">7</span>
+    `;
 
     const styles = document.createElement("style");
     styles.textContent = `
@@ -80,31 +80,47 @@ class DatePicker extends HTMLElement {
         text-align: center;
         cursor: pointer;
       }
-      .days span[selected] {
+      .days span:hover {
         background-color: ${theme.palette.highlight};
+      }
+      .days span[selected] {
+        background-color: ${theme.palette.primary};
       }
     `;
 
     shadow.appendChild(styles);
     shadow.appendChild(wrapper);
-    wrapper.appendChild(dateDisplay)
-    wrapper.appendChild(dateOptions)
+    wrapper.appendChild(dateDisplay);
+    wrapper.appendChild(dateOptions);
   }
 
   static get observedAttributes() {
-    return ["open", 'selected-date'];
+    return ["open", "selected-date"];
   }
 
   attributeChangedCallback(attr, oldValue, newValue) {
-    if (attr === 'open') {
-      const wrapper = this.shadowRoot.querySelector('.wrapper')
+    const wrapper = this.shadowRoot.querySelector(".wrapper");
 
-      if (newValue) return wrapper.setAttribute('open', '')
+    // Used for styling the wrapper element
+    if (attr === "open") {
+      if (newValue) return wrapper.setAttribute("open", "");
 
-      wrapper.removeAttribute('open')
+      wrapper.removeAttribute("open");
     }
 
-    if (attr === 'selected-date') {}
+    if (attr === "selected-date") {
+      wrapper
+        .querySelectorAll(".days span")
+        .forEach(span => span.removeAttribute("selected"));
+
+      wrapper
+        .querySelector(`.days span[data-value="${newValue}"]`)
+        .setAttribute("selected", "");
+
+      this.selectedDate = newValue;
+
+      return this.removeAttribute("open");
+    }
   }
 
   // connectedCallback() {
@@ -117,28 +133,24 @@ class DatePicker extends HTMLElement {
     return this.hasAttribute("open");
   }
 
-  get selectedDate() {
-    return this['selected-date']
+  set selectedDate(value) {
+    const dateDisplay = this.shadowRoot.querySelector(".select-date p");
+    dateDisplay.innerText = value;
   }
 
   updateOpenState({ path }) {
-    const instance = getRootInstance(path, 'DATE-PICKER')
+    const instance = getRootInstance(path, "DATE-PICKER");
     if (instance.open) {
       return instance.removeAttribute("open");
     } else instance.setAttribute("open", true);
   }
 
-  selectDate({ path, target }) {
-    const instance = getRootInstance(path, 'DATE-PICKER')
+  updateSelectedDate({ path, target }) {
+    // NOT KEEN ON THIS ROUNDABOUT APPROACH
+    const instance = getRootInstance(path, "DATE-PICKER");
 
-    // Remove selected prop from siblings
-    // instance.querySelectorAll('.days span').map(span =>
-    //   span.removeAttribute('selected')
-    // )
-
-    instance.setAttribute('selected-date', target.id)
+    instance.setAttribute("selected-date", target.dataset.value);
   }
-
 }
 
 customElements.define("date-picker", DatePicker);
