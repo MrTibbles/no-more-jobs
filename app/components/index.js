@@ -1,3 +1,5 @@
+import { addJobAction, state } from "./state";
+
 const theme = {
   palette: {
     primary: "lavender",
@@ -19,7 +21,7 @@ const baseStyles = `
     outline: none;
     padding: 0;
   }
-`
+`;
 
 /**
  * Web Component Utils
@@ -135,8 +137,6 @@ class DatePicker extends HTMLElement {
     }
   }
 
-  // disconnectedCallback() {}
-
   get open() {
     return this.hasAttribute("open");
   }
@@ -247,14 +247,6 @@ class JobList extends HTMLElement {
     wrapper.appendChild(jobListings);
   }
 
-  connectedCallback() {
-    if (this.isConnected) {
-      setTimeout(() => {
-        this.renderNewJob();
-      }, 2500);
-    }
-  }
-
   renderNewJob() {
     const jobList = this.shadowRoot.querySelector(".job-list");
     const tmpl = document.querySelector("#job-item-from-template");
@@ -271,3 +263,23 @@ class JobList extends HTMLElement {
 }
 
 customElements.define("job-list", JobList);
+
+document.addEventListener("DOMContentLoaded", () => {
+  const addJobButton = document.querySelector(".add-job");
+
+  addJobButton.onclick = async e => {
+    e.preventDefault();
+
+    const description = document.querySelector('input[name="job"]').value;
+    const dueDate = document.querySelector("date-picker")["selected-date"];
+
+    if (!description) return console.warn("No description added");
+
+    await addJobAction({ description, dueDate }).catch(error => {
+      // handle better
+      console.warn(error);
+    });
+
+    console.info(state);
+  };
+});
