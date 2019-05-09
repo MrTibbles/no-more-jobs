@@ -23,13 +23,6 @@ const baseStyles = `
   }
 `;
 
-/**
- * Web Component Utils
- */
-const getRootInstance = (nodePath, componentName) => {
-  return nodePath.find(({ nodeName }) => nodeName === componentName);
-};
-
 class DatePicker extends HTMLElement {
   constructor() {
     super();
@@ -85,7 +78,7 @@ class DatePicker extends HTMLElement {
         height: 25px;
         background-color: white;
       }
-      .wrapper[open] .days {
+      :host(date-picker[open]) .days {
         display: flex;
       }
       .days span {
@@ -115,13 +108,6 @@ class DatePicker extends HTMLElement {
   attributeChangedCallback(attr, oldValue, newValue) {
     const wrapper = this.shadowRoot.querySelector(".wrapper");
 
-    // Used for styling the wrapper element
-    if (attr === "open") {
-      if (newValue) return wrapper.setAttribute("open", "");
-
-      wrapper.removeAttribute("open");
-    }
-
     if (attr === "selected-date") {
       wrapper
         .querySelectorAll(".days span")
@@ -148,16 +134,15 @@ class DatePicker extends HTMLElement {
     return this.getAttribute("selected-date");
   }
 
-  updateOpenState({ path }) {
-    const instance = getRootInstance(path, "DATE-PICKER");
+  updateOpenState() {
+    const instance = this.getRootNode().host;
     if (instance.open) {
       return instance.removeAttribute("open");
     } else instance.setAttribute("open", true);
   }
 
-  updateSelectedDate({ path, target }) {
-    // NOT KEEN ON THIS ROUNDABOUT APPROACH
-    const instance = getRootInstance(path, "DATE-PICKER");
+  updateSelectedDate({ target }) {
+    const instance = this.getRootNode().host;
 
     instance.setAttribute("selected-date", target.dataset.value);
   }
@@ -171,20 +156,15 @@ class JobList extends HTMLElement {
 
     const shadow = this.attachShadow({ mode: "open" });
 
-    const wrapper = document.createElement("div");
-    wrapper.setAttribute("class", "wrapper");
-
     const jobListings = document.createElement("ul");
     jobListings.setAttribute("class", "job-list");
 
     const styles = document.createElement("style");
     styles.textContent = `
       ${baseStyles}
-      .wrapper {
+      .job-list {
         min-width: 12.5rem;
         margin: 2rem auto 0;
-      }
-      .job-list {
         list-style: none;
         min-height: 12.5rem;
         padding: 0;
@@ -192,8 +172,7 @@ class JobList extends HTMLElement {
     `;
 
     shadow.appendChild(styles);
-    shadow.appendChild(wrapper);
-    wrapper.appendChild(jobListings);
+    shadow.appendChild(jobListings);
   }
 
   static get observedAttributes() {
@@ -294,7 +273,7 @@ class JobItem extends HTMLElement {
         width: 75%;
         height: 75%;
       }
-      job-item[complete] svg {
+      :host(job-item[complete]) svg {
         display: block;
       }
     `;
@@ -308,7 +287,7 @@ class JobItem extends HTMLElement {
 
     await completeJobAction(e.target.parentElement.id).catch(console.warn);
 
-    const instance = getRootInstance(e.path, "JOB-ITEM");
+    const instance = this.getRootNode().host;
     instance.setAttribute("complete", "");
   }
 }
