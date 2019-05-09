@@ -16,7 +16,6 @@ button {
   border: none;
   background: none;
   cursor: pointer;
-  appearance: button;
 }
 
 body, html {
@@ -63,6 +62,10 @@ form input {
 
 .add-job {
   flex: 0.5;
+  height: 3.5rem;
+  align-self: flex-end;
+  background-color: lavender;
+  border-radius: 4px;
 }
 
 .add-job svg {

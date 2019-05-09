@@ -1,11 +1,25 @@
 const theme = {
   palette: {
-    primary: "aquamarine",
+    primary: "lavender",
     highlight: "deeppink",
     magnolia: "#f7f7f7",
     dark: "#0d0d0d"
   }
 };
+
+const baseStyles = `
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    color: ${theme.palette.dark};
+  }
+  button {
+    background: none;
+    border: none;
+    outline: none;
+    padding: 0;
+  }
+`
 
 /**
  * Web Component Utils
@@ -45,15 +59,11 @@ class DatePicker extends HTMLElement {
 
     const styles = document.createElement("style");
     styles.textContent = `
-      * {
-        box-sizing: border-box;
-        margin: 0;
-        color: ${theme.palette.dark};
-      }
+      ${baseStyles}
       .wrapper {
         height: 3.5rem;
         position: relative;
-        padding: 0 1rem;
+        padding: 0 2rem;
       }
       .select-date {
         display: flex;
@@ -168,11 +178,7 @@ class JobList extends HTMLElement {
 
     const styles = document.createElement("style");
     styles.textContent = `
-      * {
-        box-sizing: border-box;
-        margin: 0;
-        color: ${theme.palette.dark};
-      }
+      ${baseStyles}
       .wrapper {
         min-width: 12.5rem;
         margin: 2rem auto 0;
@@ -194,21 +200,45 @@ class JobList extends HTMLElement {
         border-style: solid;
         border-color: ${theme.palette.primary};
       }
-      .job-value {
+      .job-item:hover {
+        border-color: ${theme.palette.highlight};
+      }
+      .job-details {
+        padding-right: 2rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex: 1;
+      }
+      .job-details p {
         font-size: 1.75rem;
-        line-height: 4.6875rem;
+      }
+      .job-due-date {
+        padding-left: 2rem;
+      }
+      .job-due-date:before {
+        content: '⏰';
+        padding-right: 0.5rem;
       }
       .job-state {
         display: flex;
-        justify-content: center;
-        align-items: center;
         flex: none;
         width: 1.875rem;
         height: 1.875rem;
-        padding-left: 1.5rem;
+        justify-content: center;
+        align-items: center;
         background-color: ${theme.palette.magnolia};
         border-radius: 2px;
         border: 2px solid ${theme.palette.dark};
+        cursor: pointer;
+      }
+      .job-item .complete-job {
+        display: none;
+        width: 75%;
+        height: 75%;
+      }
+      .job-item[complete] .complete-job {
+        display: block;
       }
     `;
 
@@ -231,7 +261,10 @@ class JobList extends HTMLElement {
     const newTmplItem = tmpl.content.cloneNode(true);
 
     const jobValueDisplay = newTmplItem.querySelector(".job-value");
-    jobValueDisplay.innerText = "Foo";
+    const jobDueDateDisplay = newTmplItem.querySelector(".job-due-date");
+
+    jobValueDisplay.innerText = "I need to do this";
+    jobDueDateDisplay.innerText = "12/05/2019";
 
     jobList.appendChild(newTmplItem);
   }
