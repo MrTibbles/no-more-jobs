@@ -1,13 +1,15 @@
 <html>
 <head>
   <link rel="stylesheet" href="styles/base.css" />
+  <link rel="icon" type="image/png" sizes="32x32" href="images/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="images/favicon-16x16.png">
 </head>
 <body>
   <main class="container">
     <form id="add-job-form">
       <input placeholder="I simply must..." name="job" type="text">
       <date-picker></date-picker>
-      <button class="add-job">
+      <button type="button" class="add-job">
         <svg viewbox="0 0 92 69"><g fill="#000" fill-rule="nonzero"><path d="M48 12H6A6 6 0 0 1 6 0h42a6 6 0 0 1 0 12zM48 31H6a6 6 0 0 1 0-12h42a6 6 0 0 1 0 12zM30 50H6a6 6 0 0 1 0-12h24a6 6 0 0 1 0 12zM92 44c0 3.31-2.69 6-6 6H73v13c0 3.31-2.69 6-6 6s-6-2.69-6-6V50H48c-3.31 0-6-2.69-6-6s2.69-6 6-6h13V25c0-3.31 2.69-6 6-6s6 2.69 6 6v13h13c3.31 0 6 2.69 6 6z"/></g></svg>
       </button>
     </form>
@@ -21,7 +23,7 @@
         <p class="job-value"></p>
         <p class="job-due-date"></p>
       </div>
-      <button class="job-state">
+      <button type="button" class="job-state">
         <svg viewbox="0 0 35 28"><path d="M29.992.469c.568-.6 1.529-.625 2.13-.07l2.161 1.994a1.49 1.49 0 0 1 .083 2.108L13.402 26.977c-.562.603-1.465.587-2.016-.034L.383 14.535a1.545 1.545 0 0 1 .102-2.142l2.16-1.995a1.473 1.473 0 0 1 2.099.105l6.977 7.821a.901.901 0 0 0 1.349.02L29.992.47z" fill="#000" fill-rule="nonzero"/></svg>
       </button>
     </li>
