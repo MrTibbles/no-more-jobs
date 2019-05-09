@@ -273,8 +273,9 @@ class JobItem extends HTMLElement {
         width: 75%;
         height: 75%;
       }
-      :host(job-item[complete]) svg {
-        display: block;
+      :host(job-item[complete]) .job-state, :host(job-item[complete]) svg {
+        display: flex;
+        cursor: auto;
       }
     `;
 
@@ -282,12 +283,16 @@ class JobItem extends HTMLElement {
     shadow.appendChild(newTmplItem);
   }
 
-  async updateJobState(e) {
-    e.preventDefault();
+  get complete() {
+    return this.hasAttribute("complete");
+  }
 
-    await completeJobAction(e.target.parentElement.id).catch(console.warn);
-
+  async updateJobState({ target }) {
     const instance = this.getRootNode().host;
+
+    if (instance.complete) return;
+
+    await completeJobAction(target.parentElement.id).catch(console.warn);
     instance.setAttribute("complete", "");
   }
 }
@@ -298,9 +303,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const jobList = document.querySelector("job-list");
   const addJobButton = document.querySelector(".add-job");
 
-  addJobButton.onclick = async e => {
-    e.preventDefault();
-
+  // Feel there is a better approach than this 🤔
+  addJobButton.onclick = async () => {
     const description = document.querySelector('input[name="job"]').value;
     const dueDate = document.querySelector("date-picker").selectedDate;
 

@@ -26,10 +26,10 @@ const state = {
 /**
  * Add Job
  *
- * @param   {Object}  job
- * @param   {String}  job.description  What needs doing doing
- * @param   {String}  [job.dueDate]    Due date of job
- * @returns {Promise}
+ * @param  {Object}  job
+ * @param  {String}  job.description  What needs doing doing
+ * @param  {String}  [job.dueDate]    Due date of job
+ * @return {Promise}
  */
 const addJobAction = job =>
   new Promise(resolve => {
@@ -44,6 +44,12 @@ const addJobAction = job =>
     resolve();
   });
 
+/**
+ * Complete a Job
+ *
+ * @param  {String}   jobId Target Job ID that has been completed
+ * @return {Promise}
+ */
 const completeJobAction = jobId =>
   new Promise(resolve => {
     state.jobs = {
