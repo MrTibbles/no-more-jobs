@@ -1,4 +1,4 @@
-// Data model
+// Model
 class Job {
   constructor(newJob) {
     if (!newJob.description || typeof newJob.description !== "string") {
@@ -13,12 +13,13 @@ class Job {
     this.createdAt = new Date().toJSON();
     this.completedAt = undefined;
     this.description = newJob.description;
-    this.dueDate = newJob.dueDate;
+    this.dueDate = newJob.dueDate || null;
   }
 }
 
 const state = {
-  jobs: {}
+  jobs: {},
+  jobCount: 0
 };
 
 // Actions
@@ -34,8 +35,9 @@ const addJobAction = job =>
       ...state.jobs,
       [newJob.id]: newJob
     };
+    state.jobCount++;
 
-    resolve(state.jobs);
+    resolve();
   });
 
 export { addJobAction, state };

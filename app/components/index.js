@@ -131,7 +131,9 @@ class DatePicker extends HTMLElement {
         .querySelector(`.days span[data-value="${newValue}"]`)
         .setAttribute("selected", "");
 
-      this.selectedDate = newValue;
+      const dateDisplay = this.shadowRoot.querySelector(".select-date p");
+
+      dateDisplay.innerText = newValue;
 
       return this.removeAttribute("open");
     }
@@ -141,10 +143,9 @@ class DatePicker extends HTMLElement {
     return this.hasAttribute("open");
   }
 
-  set selectedDate(value) {
-    const dateDisplay = this.shadowRoot.querySelector(".select-date p");
-
-    dateDisplay.innerText = value;
+  get selectedDate() {
+    // change to formatted date
+    return this.getAttribute("selected-date");
   }
 
   updateOpenState({ path }) {
@@ -216,6 +217,9 @@ class JobList extends HTMLElement {
       .job-due-date {
         padding-left: 2rem;
       }
+      .job-due-date[hide] {
+        display: none;
+      }
       .job-due-date:before {
         content: '⏰';
         padding-right: 0.5rem;
@@ -247,16 +251,32 @@ class JobList extends HTMLElement {
     wrapper.appendChild(jobListings);
   }
 
-  renderNewJob() {
+  static get observedAttributes() {
+    return ["job-count"];
+  }
+
+  attributeChangedCallback(attr, oldValue, newValue) {
+    if (attr === "job-count" && oldValue !== newValue && newValue !== "0") {
+      const newJobId = Object.keys(state.jobs)[Number(newValue) - 1];
+
+      this.renderNewJob(state.jobs[newJobId]);
+    }
+  }
+
+  renderNewJob(newJob) {
     const jobList = this.shadowRoot.querySelector(".job-list");
     const tmpl = document.querySelector("#job-item-from-template");
     const newTmplItem = tmpl.content.cloneNode(true);
 
+    newTmplItem.querySelector(".job-item").setAttribute("id", newJob.id);
+
     const jobValueDisplay = newTmplItem.querySelector(".job-value");
     const jobDueDateDisplay = newTmplItem.querySelector(".job-due-date");
 
-    jobValueDisplay.innerText = "I need to do this";
-    jobDueDateDisplay.innerText = "12/05/2019";
+    jobValueDisplay.innerText = newJob.description;
+    if (!newJob.dueDate) {
+      jobDueDateDisplay.setAttribute("hide", "");
+    } else jobDueDateDisplay.innerText = newJob.dueDate;
 
     jobList.appendChild(newTmplItem);
   }
@@ -266,12 +286,13 @@ customElements.define("job-list", JobList);
 
 document.addEventListener("DOMContentLoaded", () => {
   const addJobButton = document.querySelector(".add-job");
+  const jobList = document.querySelector("job-list");
 
   addJobButton.onclick = async e => {
     e.preventDefault();
 
     const description = document.querySelector('input[name="job"]').value;
-    const dueDate = document.querySelector("date-picker")["selected-date"];
+    const dueDate = document.querySelector("date-picker").selectedDate;
 
     if (!description) return console.warn("No description added");
 
@@ -280,6 +301,7 @@ document.addEventListener("DOMContentLoaded", () => {
       console.warn(error);
     });
 
-    console.info(state);
+    // Update job-list prop to trigger render method on class
+    jobList.setAttribute("job-count", state.jobCount);
   };
 });
