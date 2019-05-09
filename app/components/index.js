@@ -189,6 +189,59 @@ class JobList extends HTMLElement {
         min-height: 12.5rem;
         padding: 0;
       }
+    `;
+
+    shadow.appendChild(styles);
+    shadow.appendChild(wrapper);
+    wrapper.appendChild(jobListings);
+  }
+
+  static get observedAttributes() {
+    return ["job-count"];
+  }
+
+  attributeChangedCallback(attr, oldValue, newValue) {
+    if (attr === "job-count" && oldValue < newValue) {
+      const newJobId = Object.keys(state.jobs)[newValue - 1];
+      const JobItem = customElements.get("job-item");
+      const newJob = new JobItem(state.jobs[newJobId]);
+
+      const jobList = this.shadowRoot.querySelector(".job-list");
+
+      jobList.appendChild(newJob);
+    }
+  }
+}
+
+customElements.define("job-list", JobList);
+
+class JobItem extends HTMLElement {
+  constructor(newJob) {
+    super();
+
+    const shadow = this.attachShadow({ mode: "open" });
+
+    const tmpl = document.querySelector("#job-item-from-template");
+    const newTmplItem = tmpl.content.cloneNode(true);
+
+    newTmplItem
+      .querySelector(".job-item")
+      .setAttribute("id", `job-${newJob.id}`);
+
+    const jobValueDisplay = newTmplItem.querySelector(".job-value");
+    const jobDueDateDisplay = newTmplItem.querySelector(".job-due-date");
+    const jobState = newTmplItem.querySelector(".job-state");
+
+    jobValueDisplay.innerText = newJob.description;
+    if (!newJob.dueDate) {
+      jobDueDateDisplay.setAttribute("hide", "");
+    } else jobDueDateDisplay.innerText = newJob.dueDate;
+
+    jobState.onclick = this.updateJobState;
+
+    const styles = document.createElement("style");
+    styles.textContent = `
+      ${baseStyles}
       .job-item {
         padding: 0 0.4375rem;
         height: 4.6875rem;
@@ -241,74 +294,26 @@ class JobList extends HTMLElement {
         width: 75%;
         height: 75%;
       }
-      .job-item[complete] svg {
+      job-item[complete] svg {
         display: block;
       }
     `;
 
     shadow.appendChild(styles);
-    shadow.appendChild(wrapper);
-    wrapper.appendChild(jobListings);
+    shadow.appendChild(newTmplItem);
   }
 
-  static get observedAttributes() {
-    return ["job-count"];
-  }
-
-  attributeChangedCallback(attr, oldValue, newValue) {
-    if (attr === "job-count" && oldValue !== newValue) {
-      this.updateJobListings(oldValue, newValue);
-    }
-  }
-
-  updateJobListings(oldValue, newValue) {
-    if (oldValue < newValue) {
-      const newJobId = Object.keys(state.jobs)[newValue - 1];
-      this.renderNewJob(state.jobs[newJobId]);
-    } else if (oldValue > newValue) {
-      const completedJobId = Object.keys(state.jobs)[oldValue - 1];
-      const completedJob = this.shadowRoot.querySelector(
-        `#job-${completedJobId}`
-      );
-
-      completedJob.setAttribute("complete", "");
-    }
-  }
-
-  renderNewJob(newJob) {
-    const jobList = this.shadowRoot.querySelector(".job-list");
-    const tmpl = document.querySelector("#job-item-from-template");
-    const newTmplItem = tmpl.content.cloneNode(true);
-
-    newTmplItem
-      .querySelector(".job-item")
-      .setAttribute("id", `job-${newJob.id}`);
-
-    const jobValueDisplay = newTmplItem.querySelector(".job-value");
-    const jobDueDateDisplay = newTmplItem.querySelector(".job-due-date");
-    const jobState = newTmplItem.querySelector(".job-state");
-
-    jobValueDisplay.innerText = newJob.description;
-    if (!newJob.dueDate) {
-      jobDueDateDisplay.setAttribute("hide", "");
-    } else jobDueDateDisplay.innerText = newJob.dueDate;
-
-    jobState.onclick = this.completeJob;
-
-    jobList.appendChild(newTmplItem);
-  }
-
-  async completeJob(e) {
+  async updateJobState(e) {
     e.preventDefault();
 
     await completeJobAction(e.target.parentElement.id).catch(console.warn);
 
-    const instance = getRootInstance(e.path, "JOB-LIST");
-    instance.setAttribute("job-count", state.jobCount);
+    const instance = getRootInstance(e.path, "JOB-ITEM");
+    instance.setAttribute("complete", "");
   }
 }
 
-customElements.define("job-list", JobList);
+customElements.define("job-item", JobItem);
 
 document.addEventListener("DOMContentLoaded", () => {
   const jobList = document.querySelector("job-list");
