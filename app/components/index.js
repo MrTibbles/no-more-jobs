@@ -27,7 +27,7 @@ class DatePicker extends HTMLElement {
     dateDisplay.onclick = this.updateOpenState;
     dateDisplay.setAttribute("class", "select-date");
     dateDisplay.innerHTML = `
-      <p>Select due date ⏰</p>
+      <p><span role="img" aria-label="Alarm Clock">⏰</span></p>
     `;
 
     const dateOptions = document.createElement("div");
@@ -51,19 +51,18 @@ class DatePicker extends HTMLElement {
         color: ${theme.palette.dark};
       }
       .wrapper {
-        min-width: 200px;
-        min-height: 50px;
-        background-color: ${theme.palette.magnolia};
+        height: 3.5rem;
         position: relative;
+        padding: 0 1rem;
       }
       .select-date {
         display: flex;
         justify-content: center;
         align-items: center;
-        height: 50px;
+        height: 3.5rem;
       }
       p {
-        font-size: 1.125rem;
+        font-size: 1.75rem;
       }
       .days {
         display: none;
@@ -157,17 +156,17 @@ customElements.define("date-picker", DatePicker);
 
 class JobList extends HTMLElement {
   constructor() {
-    super()
+    super();
 
     const shadow = this.attachShadow({ mode: "open" });
 
     const wrapper = document.createElement("div");
     wrapper.setAttribute("class", "wrapper");
 
-    const jobListings = document.createElement('ul')
-    jobListings.setAttribute('class', 'job-list')
+    const jobListings = document.createElement("ul");
+    jobListings.setAttribute("class", "job-list");
 
-    const styles = document.createElement('style')
+    const styles = document.createElement("style");
     styles.textContent = `
       * {
         box-sizing: border-box;
@@ -175,41 +174,66 @@ class JobList extends HTMLElement {
         color: ${theme.palette.dark};
       }
       .wrapper {
-        min-width: 200px;
-        margin: 0 auto;
+        min-width: 12.5rem;
+        margin: 2rem auto 0;
       }
       .job-list {
         list-style: none;
         min-height: 12.5rem;
         padding: 0;
       }
-      .job-list li {
-        padding: 1rem 0.4375rem;
+      .job-item {
+        padding: 0 0.4375rem;
+        height: 4.6875rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background-color: white;
+        border-radius: 2px;
+        border-width: 0 0 2px;
+        border-style: solid;
+        border-color: ${theme.palette.primary};
       }
-    `
+      .job-value {
+        font-size: 1.75rem;
+        line-height: 4.6875rem;
+      }
+      .job-state {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex: none;
+        width: 1.875rem;
+        height: 1.875rem;
+        padding-left: 1.5rem;
+        background-color: ${theme.palette.magnolia};
+        border-radius: 2px;
+        border: 2px solid ${theme.palette.dark};
+      }
+    `;
 
-    shadow.appendChild(styles)
-    shadow.appendChild(wrapper)
-    wrapper.appendChild(jobListings)
+    shadow.appendChild(styles);
+    shadow.appendChild(wrapper);
+    wrapper.appendChild(jobListings);
   }
 
   connectedCallback() {
     if (this.isConnected) {
       setTimeout(() => {
-        this.renderNewJob()
-      }, 2500)
+        this.renderNewJob();
+      }, 2500);
     }
   }
 
   renderNewJob() {
-    const jobList = this.shadowRoot.querySelector('.job-list')
-    const tmpl = document.querySelector('#job-item-from-template')
-    const newTmplItem = tmpl.content.cloneNode(true)
+    const jobList = this.shadowRoot.querySelector(".job-list");
+    const tmpl = document.querySelector("#job-item-from-template");
+    const newTmplItem = tmpl.content.cloneNode(true);
 
-    const jobValueDisplay = newTmplItem.querySelector('.job-value')
-    jobValueDisplay.innerText = 'Foo'
+    const jobValueDisplay = newTmplItem.querySelector(".job-value");
+    jobValueDisplay.innerText = "Foo";
 
-    jobList.appendChild(newTmplItem)
+    jobList.appendChild(newTmplItem);
   }
 }
 

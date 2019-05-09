@@ -23,7 +23,7 @@ body, html {
   font-size: 75%;
   font-family: sans-serif;
   font-weight: normal;
-  background-color: #f7f7f7;
+  background-color: #ffffff;
 }
 
 .container {
@@ -38,21 +38,23 @@ form {
 
 form input {
   padding: 0 7px;
-  height: 50px;
+  height: 3.5rem;
   flex: 5;
+  border: none;
+  font-size: 1.75rem;
 }
 
 ::-webkit-input-placeholder {
-  font-size: 1.125rem;
+  font-size: 1.75rem;
 }
 ::-moz-placeholder {
-  font-size: 1.125rem;
+  font-size: 1.75rem;
 }
 :-ms-input-placeholder {
-  font-size: 1.125rem;
+  font-size: 1.75rem;
 }
 :-moz-placeholder {
-  font-size: 1.125rem;
+  font-size: 1.75rem;
 }
 
 .date-picker {
