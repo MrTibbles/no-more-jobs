@@ -39,7 +39,8 @@ form input {
   padding: 0 7px;
   height: 3.5rem;
   flex: 5;
-  border: none;
+  border: 2px solid lavender;
+  border-radius: 4px;
   font-size: 1.75rem;
 }
 

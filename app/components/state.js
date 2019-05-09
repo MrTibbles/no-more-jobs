@@ -26,6 +26,10 @@ const state = {
 /**
  * Add Job
  *
+ * @param   {Object}  job
+ * @param   {String}  job.description  What needs doing doing
+ * @param   {String}  [job.dueDate]    Due date of job
+ * @returns {Promise}
  */
 const addJobAction = job =>
   new Promise(resolve => {
@@ -40,4 +44,19 @@ const addJobAction = job =>
     resolve();
   });
 
-export { addJobAction, state };
+const completeJobAction = jobId =>
+  new Promise(resolve => {
+    state.jobs = {
+      ...state.jobs,
+      [jobId]: {
+        ...state.jobs[jobId],
+        completedAt: new Date().toJSON()
+      }
+    };
+    state.jobCount--;
+
+    resolve();
+  });
+
+export { addJobAction, completeJobAction, state };
+export default state;

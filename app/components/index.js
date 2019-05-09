@@ -1,4 +1,4 @@
-import { addJobAction, state } from "./state";
+import { addJobAction, completeJobAction, state } from "./state";
 
 const theme = {
   palette: {
@@ -236,12 +236,12 @@ class JobList extends HTMLElement {
         border: 2px solid ${theme.palette.dark};
         cursor: pointer;
       }
-      .job-item .complete-job {
+      .job-item svg {
         display: none;
         width: 75%;
         height: 75%;
       }
-      .job-item[complete] .complete-job {
+      .job-item[complete] svg {
         display: block;
       }
     `;
@@ -256,10 +256,22 @@ class JobList extends HTMLElement {
   }
 
   attributeChangedCallback(attr, oldValue, newValue) {
-    if (attr === "job-count" && oldValue !== newValue && newValue !== "0") {
-      const newJobId = Object.keys(state.jobs)[Number(newValue) - 1];
+    if (attr === "job-count" && oldValue !== newValue) {
+      this.updateJobListings(oldValue, newValue);
+    }
+  }
 
+  updateJobListings(oldValue, newValue) {
+    if (oldValue < newValue) {
+      const newJobId = Object.keys(state.jobs)[newValue - 1];
       this.renderNewJob(state.jobs[newJobId]);
+    } else if (oldValue > newValue) {
+      const completedJobId = Object.keys(state.jobs)[oldValue - 1];
+      const completedJob = this.shadowRoot.querySelector(
+        `#job-${completedJobId}`
+      );
+
+      completedJob.setAttribute("complete", "");
     }
   }
 
@@ -268,25 +280,39 @@ class JobList extends HTMLElement {
     const tmpl = document.querySelector("#job-item-from-template");
     const newTmplItem = tmpl.content.cloneNode(true);
 
-    newTmplItem.querySelector(".job-item").setAttribute("id", newJob.id);
+    newTmplItem
+      .querySelector(".job-item")
+      .setAttribute("id", `job-${newJob.id}`);
 
     const jobValueDisplay = newTmplItem.querySelector(".job-value");
     const jobDueDateDisplay = newTmplItem.querySelector(".job-due-date");
+    const jobState = newTmplItem.querySelector(".job-state");
 
     jobValueDisplay.innerText = newJob.description;
     if (!newJob.dueDate) {
       jobDueDateDisplay.setAttribute("hide", "");
     } else jobDueDateDisplay.innerText = newJob.dueDate;
 
+    jobState.onclick = this.completeJob;
+
     jobList.appendChild(newTmplItem);
+  }
+
+  async completeJob(e) {
+    e.preventDefault();
+
+    await completeJobAction(e.target.parentElement.id).catch(console.warn);
+
+    const instance = getRootInstance(e.path, "JOB-LIST");
+    instance.setAttribute("job-count", state.jobCount);
   }
 }
 
 customElements.define("job-list", JobList);
 
 document.addEventListener("DOMContentLoaded", () => {
-  const addJobButton = document.querySelector(".add-job");
   const jobList = document.querySelector("job-list");
+  const addJobButton = document.querySelector(".add-job");
 
   addJobButton.onclick = async e => {
     e.preventDefault();
@@ -296,10 +322,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (!description) return console.warn("No description added");
 
-    await addJobAction({ description, dueDate }).catch(error => {
-      // handle better
-      console.warn(error);
-    });
+    // handle error better
+    await addJobAction({ description, dueDate }).catch(console.warn);
 
     // Update job-list prop to trigger render method on class
     jobList.setAttribute("job-count", state.jobCount);
