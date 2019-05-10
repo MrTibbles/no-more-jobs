@@ -16,7 +16,7 @@ class Job {
   }
 
   set completed(value) {
-    return (this.completedAt = value);
+    this.completedAt = value;
   }
 }
 
@@ -213,9 +213,6 @@ class JobList extends HTMLElement {
 
     // data store
     this.jobLog = new Map();
-
-    // event listeners
-    this.addEventListener("job-completed", this.jobCompleted);
   }
 
   static get observedAttributes() {
@@ -224,23 +221,35 @@ class JobList extends HTMLElement {
 
   connectedCallback() {
     if (this.isConnected) {
-      document.querySelector(".add-job").onclick = () => this.addJob(this);
+      document.querySelector(".add-job").addEventListener("click", this.addJob);
     }
+  }
+
+  disconnectedCallback() {
+    document
+      .querySelector(".add-job")
+      .removeEventListener("click", this.addJob);
   }
 
   get jobCount() {
     return this.getAttribute("job-count");
   }
 
+  set updateJobCount(value) {
+    this.setAttribute("job-count", value);
+  }
+
   get noMoreJobs() {
     return this.getAttribute("job-count") === 0;
   }
 
-  addJob(rootInstance) {
+  addJob() {
     const description = document.querySelector('input[name="job"]').value;
     const dueDate = document.querySelector("date-picker").selectedDate;
 
     if (!description) return console.warn("No description added");
+
+    const rootInstance = this.getRootNode().host;
 
     const job = new Job({ description, dueDate });
     const JobItem = customElements.get("job-item");
@@ -248,7 +257,7 @@ class JobList extends HTMLElement {
 
     const jobList = rootInstance.shadowRoot.querySelector(".job-list");
 
-    rootInstance.setAttribute("job-count", Number(rootInstance.jobCount + 1));
+    rootInstance.updateJobCount = Number(rootInstance.jobCount + 1);
     jobList.appendChild(newJobItem);
 
     document.querySelector("#add-job-form").reset();
@@ -263,8 +272,6 @@ class JobList extends HTMLElement {
     const targetJob = rootInstance.jobLog.get(id);
 
     targetJob.completed = new Date().toJSON();
-
-    console.info([...rootInstance.jobLog]);
   }
 }
 
