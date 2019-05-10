@@ -9,11 +9,15 @@ class Job {
       );
     }
 
-    this.id = Date.now();
+    this.id = `job-${Date.now()}`;
     this.createdAt = new Date().toJSON();
     this.completedAt = undefined;
     this.description = newJob.description;
     this.dueDate = newJob.dueDate || null;
+  }
+
+  set completed(value) {
+    return (this.completedAt = value);
   }
 }
 
@@ -52,13 +56,7 @@ const addJobAction = job =>
  */
 const completeJobAction = jobId =>
   new Promise(resolve => {
-    state.jobs = {
-      ...state.jobs,
-      [jobId]: {
-        ...state.jobs[jobId],
-        completedAt: new Date().toJSON()
-      }
-    };
+    state.jobs[jobId].completed = new Date().toJSON();
     state.jobCount--;
 
     resolve();
