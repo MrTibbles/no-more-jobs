@@ -203,9 +203,7 @@ class JobItem extends HTMLElement {
     const tmpl = document.querySelector("#job-item-from-template");
     const newTmplItem = tmpl.content.cloneNode(true);
 
-    newTmplItem
-      .querySelector(".job-item")
-      .setAttribute("id", `job-${newJob.id}`);
+    newTmplItem.querySelector(".job-item").setAttribute("id", newJob.id);
 
     const jobValueDisplay = newTmplItem.querySelector(".job-value");
     const jobDueDateDisplay = newTmplItem.querySelector(".job-due-date");
