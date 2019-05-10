@@ -8,15 +8,11 @@ class Job {
       );
     }
 
-    this.id = `job-${Date.now()}`;
+    this.id = Date.now();
     this.createdAt = new Date().toJSON();
     this.completedAt = undefined;
     this.description = newJob.description;
     this.dueDate = newJob.dueDate || null;
-  }
-
-  set completed(value) {
-    return (this.completedAt = value);
   }
 }
 
@@ -210,6 +206,9 @@ class JobList extends HTMLElement {
 
     shadow.appendChild(styles);
     shadow.appendChild(jobListings);
+
+    // data store
+    this.jobLog = new Map();
   }
 
   static get observedAttributes() {
@@ -226,6 +225,10 @@ class JobList extends HTMLElement {
     return this.getAttribute("job-count");
   }
 
+  get noMoreJobs() {
+    return this.getAttribute("job-count") === 0;
+  }
+
   addJob(rootInstance) {
     const description = document.querySelector('input[name="job"]').value;
     const dueDate = document.querySelector("date-picker").selectedDate;
@@ -240,6 +243,8 @@ class JobList extends HTMLElement {
     jobList.appendChild(new JobItem(job));
 
     document.querySelector("#add-job-form").reset();
+
+    this.jobLog.set(job.id, job);
   }
 }
 
@@ -254,7 +259,7 @@ class JobItem extends HTMLElement {
     const tmpl = document.querySelector("#job-item-from-template");
     const newTmplItem = tmpl.content.cloneNode(true);
 
-    newTmplItem.querySelector(".job-item").setAttribute("id", newJob.id);
+    this.setAttribute("id", newJob.id);
 
     const jobValueDisplay = newTmplItem.querySelector(".job-value");
     const jobDueDateDisplay = newTmplItem.querySelector(".job-due-date");
