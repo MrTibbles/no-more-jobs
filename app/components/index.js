@@ -14,6 +14,10 @@ class Job {
     this.description = newJob.description;
     this.dueDate = newJob.dueDate || null;
   }
+
+  set completed(value) {
+    return (this.completedAt = value);
+  }
 }
 
 const theme = {
@@ -209,6 +213,9 @@ class JobList extends HTMLElement {
 
     // data store
     this.jobLog = new Map();
+
+    // event listeners
+    this.addEventListener("job-completed", this.jobCompleted);
   }
 
   static get observedAttributes() {
@@ -237,14 +244,27 @@ class JobList extends HTMLElement {
 
     const job = new Job({ description, dueDate });
     const JobItem = customElements.get("job-item");
+    const newJobItem = new JobItem(job);
+
     const jobList = rootInstance.shadowRoot.querySelector(".job-list");
 
     rootInstance.setAttribute("job-count", Number(rootInstance.jobCount + 1));
-    jobList.appendChild(new JobItem(job));
+    jobList.appendChild(newJobItem);
 
     document.querySelector("#add-job-form").reset();
 
     this.jobLog.set(job.id, job);
+
+    newJobItem.addEventListener("job-completed", this.jobCompleted);
+  }
+
+  jobCompleted({ detail: { id } }) {
+    const rootInstance = this.getRootNode().host;
+    const targetJob = rootInstance.jobLog.get(id);
+
+    targetJob.completed = new Date().toJSON();
+
+    console.info([...rootInstance.jobLog]);
   }
 }
 
@@ -341,12 +361,23 @@ class JobItem extends HTMLElement {
     return this.hasAttribute("complete");
   }
 
+  get id() {
+    return Number(this.getAttribute("id"));
+  }
+
   async updateJobState() {
     const instance = this.getRootNode().host;
 
     if (instance.complete) return;
 
     instance.setAttribute("complete", "");
+
+    const completedEvent = new CustomEvent("job-completed", {
+      detail: {
+        id: instance.id
+      }
+    });
+    instance.dispatchEvent(completedEvent);
   }
 }
 
