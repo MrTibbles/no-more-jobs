@@ -1,4 +1,24 @@
-import { addJobAction, completeJobAction, state } from "./state";
+class Job {
+  constructor(newJob) {
+    if (!newJob.description || typeof newJob.description !== "string") {
+      throw new TypeError(
+        `description must be a non empty string, received: ${
+          newJob.description
+        }`
+      );
+    }
+
+    this.id = `job-${Date.now()}`;
+    this.createdAt = new Date().toJSON();
+    this.completedAt = undefined;
+    this.description = newJob.description;
+    this.dueDate = newJob.dueDate || null;
+  }
+
+  set completed(value) {
+    return (this.completedAt = value);
+  }
+}
 
 const theme = {
   palette: {
@@ -35,9 +55,7 @@ class DatePicker extends HTMLElement {
     const dateDisplay = document.createElement("div");
     dateDisplay.onclick = this.updateOpenState;
     dateDisplay.setAttribute("class", "select-date");
-    dateDisplay.innerHTML = `
-      <p><span role="img" aria-label="Alarm Clock">⏰</span></p>
-    `;
+    dateDisplay.innerHTML = `<p></p>`;
 
     const dateOptions = document.createElement("div");
     dateOptions.setAttribute("class", "days");
@@ -68,6 +86,11 @@ class DatePicker extends HTMLElement {
       }
       p {
         font-size: 1.75rem;
+      }
+      p:before {
+        content: '⏰';
+        display: inline-block;
+        padding-right: 0.5rem;
       }
       .days {
         display: none;
@@ -108,20 +131,30 @@ class DatePicker extends HTMLElement {
   attributeChangedCallback(attr, oldValue, newValue) {
     const wrapper = this.shadowRoot.querySelector(".wrapper");
 
-    if (attr === "selected-date") {
+    if (attr === "selected-date" && oldValue !== newValue) {
+      const dateDisplay = this.shadowRoot.querySelector(".select-date p");
+
       wrapper
         .querySelectorAll(".days span")
         .forEach(span => span.removeAttribute("selected"));
 
-      wrapper
-        .querySelector(`.days span[data-value="${newValue}"]`)
-        .setAttribute("selected", "");
+      if (newValue === null) {
+        dateDisplay.innerText = "";
+      } else {
+        wrapper
+          .querySelector(`.days span[data-value="${newValue}"]`)
+          .setAttribute("selected", "");
 
-      const dateDisplay = this.shadowRoot.querySelector(".select-date p");
+        dateDisplay.innerText = newValue;
+      }
 
-      dateDisplay.innerText = newValue;
+      this.removeAttribute("open");
+    }
+  }
 
-      return this.removeAttribute("open");
+  connectedCallback() {
+    if (this.isConnected) {
+      document.querySelector("#add-job-form").onreset = () => this.reset(this);
     }
   }
 
@@ -145,6 +178,10 @@ class DatePicker extends HTMLElement {
     const instance = this.getRootNode().host;
 
     instance.setAttribute("selected-date", target.dataset.value);
+  }
+
+  reset(rootInstance) {
+    rootInstance.removeAttribute("selected-date");
   }
 }
 
@@ -179,16 +216,30 @@ class JobList extends HTMLElement {
     return ["job-count"];
   }
 
-  attributeChangedCallback(attr, oldValue, newValue) {
-    if (attr === "job-count" && oldValue < newValue) {
-      const newJobId = Object.keys(state.jobs)[newValue - 1];
-      const JobItem = customElements.get("job-item");
-      const newJob = new JobItem(state.jobs[newJobId]);
-
-      const jobList = this.shadowRoot.querySelector(".job-list");
-
-      jobList.appendChild(newJob);
+  connectedCallback() {
+    if (this.isConnected) {
+      document.querySelector(".add-job").onclick = () => this.addJob(this);
     }
+  }
+
+  get jobCount() {
+    return this.getAttribute("job-count");
+  }
+
+  addJob(rootInstance) {
+    const description = document.querySelector('input[name="job"]').value;
+    const dueDate = document.querySelector("date-picker").selectedDate;
+
+    if (!description) return console.warn("No description added");
+
+    const job = new Job({ description, dueDate });
+    const JobItem = customElements.get("job-item");
+    const jobList = rootInstance.shadowRoot.querySelector(".job-list");
+
+    rootInstance.setAttribute("job-count", Number(rootInstance.jobCount + 1));
+    jobList.appendChild(new JobItem(job));
+
+    document.querySelector("#add-job-form").reset();
   }
 }
 
@@ -285,33 +336,13 @@ class JobItem extends HTMLElement {
     return this.hasAttribute("complete");
   }
 
-  async updateJobState({ target }) {
+  async updateJobState() {
     const instance = this.getRootNode().host;
 
     if (instance.complete) return;
 
-    await completeJobAction(target.parentElement.id).catch(console.warn);
     instance.setAttribute("complete", "");
   }
 }
 
 customElements.define("job-item", JobItem);
-
-document.addEventListener("DOMContentLoaded", () => {
-  const jobList = document.querySelector("job-list");
-  const addJobButton = document.querySelector(".add-job");
-
-  // Feel there is a better approach than this 🤔
-  addJobButton.onclick = async () => {
-    const description = document.querySelector('input[name="job"]').value;
-    const dueDate = document.querySelector("date-picker").selectedDate;
-
-    if (!description) return console.warn("No description added");
-
-    // handle error better
-    await addJobAction({ description, dueDate }).catch(console.warn);
-
-    // Update job-list prop to trigger render method on class
-    jobList.setAttribute("job-count", state.jobCount);
-  };
-});
