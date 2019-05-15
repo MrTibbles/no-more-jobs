@@ -249,7 +249,7 @@ class JobList extends HTMLElement {
 
     if (!description) return console.warn("No description added");
 
-    const rootInstance = this.getRootNode().host;
+    const rootInstance = document.querySelector("job-list");
 
     const job = new Job({ description, dueDate });
     const JobItem = customElements.get("job-item");
@@ -262,7 +262,7 @@ class JobList extends HTMLElement {
 
     document.querySelector("#add-job-form").reset();
 
-    this.jobLog.set(job.id, job);
+    rootInstance.jobLog.set(job.id, job);
 
     newJobItem.addEventListener("job-completed", this.jobCompleted);
   }
