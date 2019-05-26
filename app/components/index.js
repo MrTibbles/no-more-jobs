@@ -60,15 +60,20 @@ class DatePicker extends HTMLElement {
     const dateOptions = document.createElement("div");
     dateOptions.setAttribute("class", "days");
     dateOptions.onclick = this.updateSelectedDate;
-    dateOptions.innerHTML = `
-      <span data-value="1">1</span>
-      <span data-value="2">2</span>
-      <span data-value="3">3</span>
-      <span data-value="4">4</span>
-      <span data-value="5">5</span>
-      <span data-value="6">6</span>
-      <span data-value="7">7</span>
-    `;
+
+    const today = new Date();
+    const numberOfDays = new Date(
+      today.getFullYear(),
+      today.getMonth(),
+      0
+    ).getDate();
+
+    let days = ``;
+    for (var i = 0; i < numberOfDays; i++) {
+      days += `<span data-value="${i + 1}">${i + 1}</span>`;
+    }
+
+    dateOptions.innerHTML = days;
 
     const styles = document.createElement("style");
     styles.textContent = `
@@ -95,17 +100,19 @@ class DatePicker extends HTMLElement {
       .days {
         display: none;
         position: absolute;
-        left: 0;
-        right: 0;
-        bottom: -25px;
-        height: 25px;
+        left: -10px;
+        right: -10px;
+        bottom: -100px;
+        height: 100px;
         background-color: white;
+        box-shadow: 0 10px 20px 2px #666;
+        flex-wrap: wrap;
       }
       :host(date-picker[open]) .days {
         display: flex;
       }
       .days span {
-        flex-grow: 1;
+        width: 14.285%;
         padding: 0.4375rem 0;
         text-align: center;
         cursor: pointer;
@@ -145,7 +152,12 @@ class DatePicker extends HTMLElement {
           .querySelector(`.days span[data-value="${newValue}"]`)
           .setAttribute("selected", "");
 
-        dateDisplay.innerText = newValue;
+        const today = new Date();
+        dateDisplay.innerText = new Date(
+          today.getFullYear(),
+          today.getMonth(),
+          newValue
+        ).toLocaleDateString();
       }
 
       this.removeAttribute("open");
@@ -245,7 +257,13 @@ class JobList extends HTMLElement {
 
   addJob() {
     const description = document.querySelector('input[name="job"]').value;
-    const dueDate = document.querySelector("date-picker").selectedDate;
+    const selectedDate = document.querySelector("date-picker").selectedDate;
+    const today = new Date();
+    const dueDate = new Date(
+      today.getFullYear(),
+      today.getMonth(),
+      selectedDate
+    ).toDateString();
 
     if (!description) return console.warn("No description added");
 
