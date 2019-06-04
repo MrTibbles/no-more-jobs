@@ -35,7 +35,9 @@ class JobSpeechRecognition extends HTMLElement {
         border-radius: 50%;
       }
 
-      :host(speech-recognition[disabled]) {}
+      :host(speech-recognition[disabled]) {
+        opacity: 0.5;
+      }
 
       :host(speech-recognition[listening]) .start-speech {
         display: none;
@@ -60,7 +62,7 @@ class JobSpeechRecognition extends HTMLElement {
     wrapper.appendChild(stopSpeechBtn);
   }
 
-  get speechDisabled() {
+  get isDisabled() {
     return this.hasAttribute("disabled");
   }
 
@@ -74,7 +76,7 @@ class JobSpeechRecognition extends HTMLElement {
     try {
       await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
 
-      if (this.speechDisabled) {
+      if (this.isDisabled) {
         this.removeAttribute("disabled");
       }
 
@@ -91,6 +93,10 @@ class JobSpeechRecognition extends HTMLElement {
     } catch (err) {
       console.warn("SpeechRecognition disabled");
       this.setAttribute("disabled", "");
+
+      const buttons = this.shadowRoot.querySelectorAll("button");
+
+      buttons.forEach(button => button.setAttribute("disabled", ""));
     }
   }
 
