@@ -16,7 +16,7 @@ class JobSpeechRecognition extends HTMLElement {
         display: flex;
         width: 3.5rem;
         height: 3.5rem;
-        margin: 0 12px;
+        margin: 0 0.75rem;
         border-radius: 50%;
         background-color: var(--color-primary);
         overflow: hidden;
@@ -35,6 +35,17 @@ class JobSpeechRecognition extends HTMLElement {
         width: 100%;
         height: 100%;
         background-color: indianred;
+        opacity: 1;
+        animation: 3500ms infinite alternate opacityPulse;
+      }
+
+      @keyframes opacityPulse {
+        0%, 100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.75;
+        }
       }
 
       :host(speech-recognition[disabled]) {
