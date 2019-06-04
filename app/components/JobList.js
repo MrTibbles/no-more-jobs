@@ -80,13 +80,18 @@ class JobList extends HTMLElement {
 
   addJob() {
     const description = document.querySelector('input[name="job"]').value;
-    const selectedDate = document.querySelector("date-picker").selectedDate;
-    const today = new Date();
-    const dueDate = new Date(
-      today.getFullYear(),
-      today.getMonth(),
-      selectedDate
-    ).toDateString();
+    const datePicker = document.querySelector("date-picker");
+
+    let dueDate;
+    if (datePicker) {
+      const selectedDate = document.querySelector("date-picker").selectedDate;
+      const today = new Date();
+      dueDate = new Date(
+        today.getFullYear(),
+        today.getMonth(),
+        selectedDate
+      ).toDateString();
+    }
 
     if (!description) return console.warn("No description added");
 
