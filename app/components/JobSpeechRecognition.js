@@ -14,9 +14,12 @@ class JobSpeechRecognition extends HTMLElement {
 
       .wrapper {
         display: flex;
-        width: 32px;
-        height: 32px;
+        width: 3.5rem;
+        height: 3.5rem;
         margin: 0 12px;
+        border-radius: 50%;
+        background-color: var(--color-primary);
+        overflow: hidden;
       }
 
       .start-speech {
@@ -24,15 +27,14 @@ class JobSpeechRecognition extends HTMLElement {
         width: 100%;
         height: 100%;
         background: url("./images/microphone-lavender.svg") no-repeat center;
-        background-size: contain;
+        background-size: auto 70%;
       }
 
       .stop-speech {
         display: none;
         width: 100%;
         height: 100%;
-        background-color: red;
-        border-radius: 50%;
+        background-color: indianred;
       }
 
       :host(speech-recognition[disabled]) {
@@ -74,6 +76,11 @@ class JobSpeechRecognition extends HTMLElement {
     if (!this.isConnected) return;
 
     try {
+      // Check for SpeechRecognition API - currently only webkit
+      if (!window.webkitSpeechRecognition) {
+        throw new Error("SpeechRecognition API not available on browser");
+      }
+
       await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
 
       if (this.isDisabled) {
@@ -91,7 +98,7 @@ class JobSpeechRecognition extends HTMLElement {
       this.recognition.addEventListener("result", this.onSpeechResult);
       this.recognition.addEventListener("nomatch", this.noSpeechMatch);
     } catch (err) {
-      console.warn("SpeechRecognition disabled");
+      console.warn("SpeechRecognition disabled:", err);
       this.setAttribute("disabled", "");
 
       const buttons = this.shadowRoot.querySelectorAll("button");
