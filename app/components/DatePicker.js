@@ -1,4 +1,4 @@
-import { baseStyles } from "./shared";
+import { baseStyles } from "./shared.js";
 
 class DatePicker extends HTMLElement {
   constructor() {
