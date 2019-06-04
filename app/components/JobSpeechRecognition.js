@@ -14,20 +14,35 @@ class JobSpeechRecognition extends HTMLElement {
 
       .wrapper {
         display: flex;
+        width: 32px;
+        height: 32px;
+        margin: 0 12px;
       }
 
       .start-speech {
         display: block;
-        width: 50px;
-        height: 50px;
-        background-color: var(--color-primary);
+        width: 100%;
+        height: 100%;
+        background: url("./images/microphone-lavender.svg") no-repeat center;
+        background-size: contain;
       }
 
       .stop-speech {
-        display: block;
-        width: 50px;
-        height: 50px;
+        display: none;
+        width: 100%;
+        height: 100%;
         background-color: red;
+        border-radius: 50%;
+      }
+
+      :host(speech-recognition[disabled]) {}
+
+      :host(speech-recognition[listening]) .start-speech {
+        display: none;
+      }
+
+      :host(speech-recognition[listening]) .stop-speech {
+        display: block;
       }
     `;
 
@@ -45,35 +60,37 @@ class JobSpeechRecognition extends HTMLElement {
     wrapper.appendChild(stopSpeechBtn);
   }
 
-  get speechDisabled(){
-    return this.getAttribute('disabled') || false
+  get speechDisabled() {
+    return this.hasAttribute("disabled");
+  }
+
+  get isListening() {
+    return this.hasAttribute("listening");
   }
 
   async connectedCallback() {
-    if (!this.isConnected) return
+    if (!this.isConnected) return;
 
     try {
       await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
 
       if (this.speechDisabled) {
-        this.removeAttribute('disabled')
+        this.removeAttribute("disabled");
       }
 
-      this.recognition = new (
-        window.SpeechRecognition || window.webkitSpeechRecognition
-      )();
+      this.recognition = new (window.SpeechRecognition ||
+        window.webkitSpeechRecognition)();
 
       this.recognition.lang = "en-US";
       this.recognition.interimResults = false;
       this.recognition.maxAlternatives = 1;
 
-      this.recognition.addEventListener('error', this.onSpeechError);
-      this.recognition.addEventListener('result', this.onSpeechResult);
-      this.recognition.addEventListener('nomatch', this.noSpeechMatch);
-
-    } catch(err) {
-      console.log(err)
-      this.setAttribute('disabled', '')
+      this.recognition.addEventListener("error", this.onSpeechError);
+      this.recognition.addEventListener("result", this.onSpeechResult);
+      this.recognition.addEventListener("nomatch", this.noSpeechMatch);
+    } catch (err) {
+      console.warn("SpeechRecognition disabled");
+      this.setAttribute("disabled", "");
     }
   }
 
@@ -81,23 +98,30 @@ class JobSpeechRecognition extends HTMLElement {
 
   startSpeech() {
     const instance = this.getRootNode().host;
-    instance.recognition.start();
 
-    console.log("Started listening");
+    if (instance.isListening) return;
+
+    instance.recognition.start();
+    instance.setAttribute("listening", "");
   }
 
   stopSpeech() {
     const instance = this.getRootNode().host;
-    instance.recognition.stop();
 
-    console.log("Stopped listening");
+    if (!instance.isListening) return;
+
+    instance.recognition.stop();
+    instance.removeAttribute("listening");
   }
 
-  onSpeechResult(e) {
-    console.info(`onSpeechResult`);
-    const result = e.results[0][0]
-    
-    console.info(result);
+  onSpeechResult({ results }) {
+    const instance = document.querySelector("speech-recognition");
+    const { confidence, transcript } = results[0][0];
+
+    instance.removeAttribute("listening");
+
+    console.info(`${transcript} -- accuracy: ${confidence}`);
+    document.querySelector('input[name="job"]').value = transcript;
   }
 
   noSpeechMatch(e) {
@@ -106,8 +130,8 @@ class JobSpeechRecognition extends HTMLElement {
   }
 
   onSpeechError(e) {
-    console.warn('onSpeechError')
-    console.warn(e)
+    console.warn("onSpeechError");
+    console.warn(e);
   }
 }
 
