@@ -26,7 +26,8 @@ class DatePicker extends HTMLElement {
     ).getDate();
 
     let days = ``;
-    for (var i = 0; i < numberOfDays; i++) {
+
+    for (let i = 0; i < numberOfDays; i++) {
       days += `<span data-value="${i + 1}">${i + 1}</span>`;
     }
 
