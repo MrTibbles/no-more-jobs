@@ -83,6 +83,7 @@ class JobList extends HTMLElement {
     const datePicker = document.querySelector("date-picker");
 
     let dueDate;
+
     if (datePicker) {
       const selectedDate = document.querySelector("date-picker").selectedDate;
       const today = new Date();
