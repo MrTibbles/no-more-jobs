@@ -4,7 +4,9 @@ class Job {
   constructor(newJob) {
     if (!newJob.description || typeof newJob.description !== "string") {
       throw new TypeError(
-        `description must be a non empty string, received: ${newJob.description}`
+        `description must be a non empty string, received: ${
+          newJob.description
+        }`
       );
     }
 
